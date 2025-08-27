@@ -51,9 +51,12 @@ export const checkJUCases = async (
       errors.push("No tooth numbers found in PDF.");
     }
 
-    const err = await mainCheckerFunctionJU(pdfData,folderData);
-
-    if(err){errors.push(...err)}
+    if (errors.length === 0) {
+      const err = await mainCheckerFunctionJU(pdfData, folderData);
+      if (err) {
+        errors.push(...err);
+      }
+    }
 
     // --- build result ---
     if (errors.length === 0) {
