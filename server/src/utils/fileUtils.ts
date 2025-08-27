@@ -28,68 +28,54 @@ export async function getSharedPath(): Promise<string | null> {
   return folderName ? `${root_dir}${folderName}` : null;
 }
 
-
-
 export const getLabTokens = async (commonPath: string): Promise<string[]> => {
-    try {
-      const entries = await fs.readdir(commonPath, { withFileTypes: true });
-      return entries
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => entry.name);
-    } catch (error) {
-      console.error(`Error reading folder: ${commonPath}`, error);
-      return [];
-    }
-  };
+  try {
+    const entries = await fs.readdir(commonPath, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+  } catch (error) {
+    console.error(`Error reading folder: ${commonPath}`, error);
+    return [];
+  }
+};
 
+export const getCasesList = async (commonPath: string): Promise<string[]> => {
+  try {
+    const importFolders = await getCasesImports(`${commonPath}/IMPORT/`);
+    const exportFolders = await getCasesExports(
+      `${commonPath}/EXPORT - External/`
+    );
+    // Find common cases
+    const commonCases = importFolders.filter((folder) =>
+      exportFolders.includes(folder)
+    );
+    return commonCases;
+  } catch (error) {
+    console.error(`Error reading Cases List`, error);
+    return []; // always return array
+  }
+};
 
+// Utility to get folder names inside imports
+const getCasesImports = async (folderPath: string): Promise<string[]> => {
+  return getFolderNames(folderPath);
+};
 
+// Utility to get folder names inside exports
+const getCasesExports = async (folderPath: string): Promise<string[]> => {
+  return getFolderNames(folderPath);
+};
 
-
-  export const getCasesList = async (
-    commonPath: string
-  ): Promise<string[]> => {
-    try {
-      const importFolders = await getCasesImports(`${commonPath}/IMPORT/`);
-      const exportFolders = await getCasesExports(
-        `${commonPath}/EXPORT - External/`
-      );
-      // Find common cases
-      const commonCases = importFolders.filter((folder) =>
-        exportFolders.includes(folder)
-      );
-      return commonCases;
-    } catch (error) {
-      console.error(`Error reading Cases List`, error);
-      return []; // always return array
-    }
-  };
-  
-  
-  // Utility to get folder names inside imports
-  const getCasesImports = async (
-    folderPath: string
-  ): Promise<string[]> => {
-    return getFolderNames(folderPath);
-  };
-  
-  // Utility to get folder names inside exports
-  const getCasesExports = async (
-    folderPath: string
-  ): Promise<string[]> => {
-    return getFolderNames(folderPath);
-  };
-  
-  // utility for import and export folder sub folder names
-  const getFolderNames = async (folderPath: string): Promise<string[]> => {
-    try {
-      const entries = await fs.readdir(folderPath, { withFileTypes: true });
-      return entries
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => entry.name);
-    } catch (error) {
-      console.error(`Error reading folder: ${folderPath}`, error);
-      return [];
-    }
-  };
-  
+// utility for import and export folder sub folder names
+const getFolderNames = async (folderPath: string): Promise<string[]> => {
+  try {
+    const entries = await fs.readdir(folderPath, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+  } catch (error) {
+    console.error(`Error reading folder: ${folderPath}`, error);
+    return [];
+  }
+};

@@ -14,12 +14,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/pdfjs-dist": "^2.10.377",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "express": "^5.1.0",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^5.4.54"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
