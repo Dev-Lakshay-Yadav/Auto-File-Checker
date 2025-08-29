@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import { format, subDays } from "date-fns";
 
-const root_dir = "Z:/";
+const root_dir = process.env.CASES_PATH || "Z:/"; // make path configurable
 
 function getISTDate(): Date {
   return new Date(
@@ -10,23 +10,30 @@ function getISTDate(): Date {
 }
 
 export async function resolveDateFolderName(): Promise<string | null> {
-  const nowIST = getISTDate();
-  const hourIST = nowIST.getHours();
+  try {
+    const nowIST = getISTDate();
+    const hourIST = nowIST.getHours();
 
-  // Before 4 PM → yesterday, after 4 PM → today
-  const targetDate = hourIST < 16 ? subDays(nowIST, 1) : nowIST;
-  const folderName = "RT-" + format(targetDate, "dd MMM yyyy").toUpperCase();
+    // Before 4 PM → yesterday, after 4 PM → today
+    const targetDate = hourIST < 16 ? subDays(nowIST, 1) : nowIST;
+    const folderName = "RT-" + format(targetDate, "dd MMM yyyy").toUpperCase();
 
-  const entries = await fs.readdir(root_dir, { withFileTypes: true });
-  const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+    // Read directory safely
+    const entries = await fs.readdir(root_dir, { withFileTypes: true });
+    const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
 
-  return folders.includes(folderName) ? folderName : null;
+    return folders.includes(folderName) ? folderName : null;
+  } catch (err: any) {
+    console.error(`Failed to read root_dir "${root_dir}":`, err.message);
+    return null; // gracefully return null instead of crashing
+  }
 }
 
 export async function getSharedPath(): Promise<string | null> {
   const folderName = await resolveDateFolderName();
   return folderName ? `${root_dir}${folderName}` : null;
 }
+
 
 export const getLabTokens = async (commonPath: string): Promise<string[]> => {
   try {
