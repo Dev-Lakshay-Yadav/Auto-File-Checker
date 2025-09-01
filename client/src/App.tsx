@@ -21,11 +21,7 @@ const App = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/cases/status`, {
-          headers: {
-            "ngrok-skip-browser-warning": "any-value"
-          }
-        });
+        const res = await fetch(`http://localhost:4000/cases/status`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const json: ApiResponse = await res.json();
         setData(json);

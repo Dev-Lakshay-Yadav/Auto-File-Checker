@@ -93,7 +93,10 @@ export const mainCheckerFunctionJU = async (
     if (!hasImageContaining(folderData, "hole angulation")) {
       errors.push("Missing image: hole angulation");
     }
-    if (!hasImageContaining(folderData, "3 mm hole")) {
+    if (
+      !hasImageContaining(folderData, "3 mm hole") ||
+      !hasImageContaining(folderData, "3mm hole")
+    ) {
       errors.push("Missing image: 3 mm hole");
     }
     if (!hasImageContaining(folderData, "ti base")) {
