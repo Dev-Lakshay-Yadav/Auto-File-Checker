@@ -1,9 +1,9 @@
-import { mainCheckerFunctionJU } from "../checkerUtils/JUcheckerUtils.js";
+import { mainCheckerFunctionSA } from "../checkerUtils/SAcheckerUtils.js";
 
 // ----------- Interfaces -------------
 export interface PdfData {
   file_Prefix: string | null;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
+  service_Type: "Implant" | null;
   tooth_Numbers: number[];
   additional_Notes: string | null;
 }
@@ -14,7 +14,7 @@ export type FolderData = string[];
 export interface Result {
   success: boolean;
   file_Prefix: string;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
+  service_Type: "Implant" | null;
   tooth_Numbers: number[];
   additional_Notes: string | null;
   error: string[];
@@ -23,7 +23,7 @@ export interface Result {
 export type ResultData = Result | null;
 
 // ----------- Function (dynamic checks) -------------
-export const checkJUCases = async (
+export const checkSACases = async (
   pdfData: PdfData,
   folderData: FolderData
 ): Promise<ResultData> => {
@@ -52,7 +52,7 @@ export const checkJUCases = async (
     }
 
     if (errors.length === 0) {
-      const err = await mainCheckerFunctionJU(pdfData, folderData);
+      const err = await mainCheckerFunctionSA(pdfData, folderData);
       if (err) {
         errors.push(...err);
       }

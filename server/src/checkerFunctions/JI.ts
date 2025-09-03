@@ -1,9 +1,9 @@
-import { mainCheckerFunctionJU } from "../checkerUtils/JUcheckerUtils.js";
+import { mainCheckerFunctionJI } from "../checkerUtils/JIcheckerUtils.js";
 
 // ----------- Interfaces -------------
 export interface PdfData {
   file_Prefix: string | null;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
+  service_Type: null;
   tooth_Numbers: number[];
   additional_Notes: string | null;
 }
@@ -14,7 +14,7 @@ export type FolderData = string[];
 export interface Result {
   success: boolean;
   file_Prefix: string;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
+  service_Type: null;
   tooth_Numbers: number[];
   additional_Notes: string | null;
   error: string[];
@@ -23,16 +23,16 @@ export interface Result {
 export type ResultData = Result | null;
 
 // ----------- Function (dynamic checks) -------------
-export const checkJUCases = async (
+export const checkJICases = async (
   pdfData: PdfData,
   folderData: FolderData
 ): Promise<ResultData> => {
   try {
-    if (!pdfData.service_Type) {
-      return null;
-    }
-
     const errors: string[] = [];
+
+    if (pdfData.service_Type !== null) {
+      errors.push("some service type detected");
+    }
 
     // --- validations ---
     if (!pdfData.file_Prefix) {
@@ -47,12 +47,8 @@ export const checkJUCases = async (
       }
     }
 
-    if (pdfData.tooth_Numbers.length === 0) {
-      errors.push("No tooth numbers found in PDF.");
-    }
-
     if (errors.length === 0) {
-      const err = await mainCheckerFunctionJU(pdfData, folderData);
+      const err = await mainCheckerFunctionJI(pdfData, folderData);
       if (err) {
         errors.push(...err);
       }

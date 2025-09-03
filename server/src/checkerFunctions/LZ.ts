@@ -1,4 +1,4 @@
-import { mainCheckerFunctionJU } from "../checkerUtils/JUcheckerUtils.js";
+import { mainCheckerFunctionLZ } from "../checkerUtils/LZcheckerUtils.js";
 
 // ----------- Interfaces -------------
 export interface PdfData {
@@ -23,7 +23,7 @@ export interface Result {
 export type ResultData = Result | null;
 
 // ----------- Function (dynamic checks) -------------
-export const checkJUCases = async (
+export const checkLZCases = async (
   pdfData: PdfData,
   folderData: FolderData
 ): Promise<ResultData> => {
@@ -52,7 +52,7 @@ export const checkJUCases = async (
     }
 
     if (errors.length === 0) {
-      const err = await mainCheckerFunctionJU(pdfData, folderData);
+      const err = await mainCheckerFunctionLZ(pdfData, folderData);
       if (err) {
         errors.push(...err);
       }

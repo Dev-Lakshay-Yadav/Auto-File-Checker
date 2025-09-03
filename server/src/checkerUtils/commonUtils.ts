@@ -19,6 +19,23 @@ export const hasImageContaining = (
   );
 };
 
+
+export const hasSTLContaining = (
+  folderFiles: string[],
+  keyword: string
+): boolean => {
+  const exts = [".stl"];
+  return (
+    folderFiles?.some((file) => {
+      const f = file.toLowerCase();
+      return (
+        f.includes(keyword.toLowerCase()) &&
+        exts.some((ext) => f.endsWith(ext.toLowerCase()))
+      );
+    }) ?? false
+  );
+};
+
 /**
  * Count how many files in the list contain a keyword and have one of the specified extensions
  */

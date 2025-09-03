@@ -7,8 +7,43 @@ import {
 } from "../utils/fileUtils.js";
 import { extractCaseDetailsFromPDF } from "../services/pdfToText.js";
 import { getFilesAndFolderNamesInsideCaseFolder } from "../services/folderFiles.js";
-import { checkJUCases } from "../checkerFunctions/JU.js";
 
+import { checkJUCases } from "../checkerFunctions/JU.js";
+import { checkJICases } from "../checkerFunctions/JI.js";
+import { checkLZCases } from "../checkerFunctions/LZ.js";
+import { checkSACases } from "../checkerFunctions/SA.js";
+
+type CheckerFn = (pdfData: any, folderData: any) => Promise<any>;
+
+// Generic processor for lab cases
+export const processLabCases = async (
+  location: string,
+  checkerFn: CheckerFn
+) => {
+  try {
+    const commonCases = await getCasesList(location);
+    const results: any[] = [];
+
+    for (const caseData of commonCases) {
+      const pdfPath = `${location}/IMPORT/${caseData}`;
+      const folderPath = `${location}/EXPORT - External/${caseData}`;
+
+      const pdfData = await extractCaseDetailsFromPDF(pdfPath);
+      const folderData = await getFilesAndFolderNamesInsideCaseFolder(
+        folderPath
+      );
+
+      results.push(await checkerFn(pdfData, folderData));
+    }
+
+    return results;
+  } catch (error) {
+    console.error(error, "processLabCases");
+    return [];
+  }
+};
+
+// Splits cases by lab token and runs the appropriate checker
 export const splitCasesByLabToken = async () => {
   try {
     const commonPath = await getSharedPath();
@@ -17,20 +52,21 @@ export const splitCasesByLabToken = async () => {
     }
 
     const folderNames = await getLabTokens(commonPath);
-    const verifiedLabTokens = ["JU"];
+    const verifiedLabTokens = ["JU", "SA", "JI", "LZ"];
     const results: Record<string, any> = {};
 
-    // Map each token to its checker function
+    // Map each token directly to its checker function
     const checkerMap: Record<string, (path: string) => Promise<any>> = {
-      JU: checkerFunctionForJU,
-      // ES: checkerFunctionForES,  if want more just add function and checks and add token in verifiedLabTokens array
+      JU: (location) => processLabCases(location, checkJUCases),
+      SA: (location) => processLabCases(location, checkSACases),
+      JI: (location) => processLabCases(location, checkJICases),
+      LZ: (location) => processLabCases(location, checkLZCases),
     };
 
     for (const token of folderNames) {
       if (verifiedLabTokens.includes(token) && checkerMap[token]) {
         const folderPath = `${commonPath}/${token}/`;
-        const result = await checkerMap[token](folderPath);
-        results[token] = result;
+        results[token] = await checkerMap[token](folderPath);
       }
     }
 
@@ -41,30 +77,11 @@ export const splitCasesByLabToken = async () => {
   }
 };
 
-export const checkerFunctionForJU = async (location: string) => {
-  try {
-    const commonCases = await getCasesList(location);
-    const data: Record<string, any> = [];
-    for (const caseData of commonCases) {
-      const pdfData = await extractCaseDetailsFromPDF(
-        `${location}/IMPORT/${caseData}`
-      );
-      const folderData = await getFilesAndFolderNamesInsideCaseFolder(
-        `${location}/EXPORT - External/${caseData}`
-      );
-      data.push(await checkJUCases(pdfData, folderData));
-    }
-    return data;
-  } catch (error) {
-    console.error(error, "checkerFunctionForJU");
-    return [];
-  }
-};
-
+// Express controller to send case status
 export const sendCasesStatus = async (req: Request, res: Response) => {
   try {
     const casesStatus = await splitCasesByLabToken();
-    res.json(casesStatus); // send JSON back to Postman
+    res.json(casesStatus);
   } catch (error) {
     handleApiError(res, error, "checkCases");
   }

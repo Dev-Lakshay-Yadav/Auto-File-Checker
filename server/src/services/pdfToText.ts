@@ -2,14 +2,6 @@ import fs from "fs";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { processPdfText } from "../utils/textExtractionUtils.js";
 
-// --------------  Basically Extract the json data from pdf text  -----------------
-// processedCaseData = {
-//   "file_Prefix": "JU06706 -- Julie Wogan",
-//   "service_Type": "Crown And Bridge",
-//   "tooth_Numbers": [1,2,4],
-//   "additional_Notes": "hello string"
-// }
-
 export const extractCaseDetailsFromPDF = async (folderPath: string) => {
   const filePath = `${folderPath}/CaseDetails.pdf`;
   const pdfData = new Uint8Array(fs.readFileSync(filePath));

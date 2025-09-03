@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Dashboard from "./components/Dashboard";
 
 interface ApiResponseItem {
   success: boolean;
@@ -10,13 +11,14 @@ interface ApiResponseItem {
 }
 
 interface ApiResponse {
-  JU: (ApiResponseItem | null)[];
+  [key: string]: (ApiResponseItem | null)[];
 }
 
 const App = () => {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,6 +27,10 @@ const App = () => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const json: ApiResponse = await res.json();
         setData(json);
+
+        // Set the first key as default active
+        const firstKey = Object.keys(json)[0] || null;
+        setActiveKey(firstKey);
       } catch (err: any) {
         setError(err.message || "Something went wrong");
       } finally {
@@ -34,58 +40,35 @@ const App = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div className="text-gray-500">Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!data) return <div>No data found</div>;
+  if (loading) return <div className="p-6 text-gray-500">Loading...</div>;
+  if (error) return <div className="p-6 text-red-500">{error}</div>;
+  if (!data) return <div className="p-6">No data found</div>;
+
+  const keys = Object.keys(data);
 
   return (
-    <div className="flex flex-col gap-4 text-sm p-4">
-      {/* Table Header */}
-      <div className="flex gap-2 px-4 py-2 bg-gray-100 rounded-lg font-semibold">
-        <div className="w-2/12">Case</div>
-        <div className="w-2/12">Service Type</div>
-        <div className="w-2/12">Tooth Numbers</div>
-        <div className="w-3/12">Additional Notes</div>
-        <div className="w-3/12">Status / Errors</div>
+    <div className="w-full h-full">
+      {/* Buttons */}
+      <div className="w-full flex gap-4 p-4 items-center justify-center">
+        {keys.map((key) => (
+          <button
+            key={key}
+            onClick={() => setActiveKey(key)}
+            className={`cursor-pointer px-4 rounded ${
+              activeKey === key
+                ? "bg-gray-900 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            {key}
+          </button>
+        ))}
       </div>
 
-      {/* Table Rows */}
-      {data.JU.length > 0 ? (
-        data.JU.map((item, index) => {
-          if (!item) return null;
-
-          return (
-            <div
-              key={index}
-              className="flex w-full gap-2 px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
-            >
-              <div className="w-2/12">{item.file_Prefix}</div>
-              <div className="w-2/12">{item.service_Type}</div>
-              <div className="w-2/12">{item.tooth_Numbers.join(", ")}</div>
-
-              {/* Additional Notes */}
-              <div className="w-3/12">{item.additional_Notes}</div>
-
-              {/* Errors */}
-              <div className="w-3/12">
-                {item.success ? (
-                  <span className="text-green-600 font-bold">
-                    All files present ✅
-                  </span>
-                ) : (
-                  <ul className="list-disc list-inside text-red-600">
-                    {item.error.map((err, i) => (
-                      <li key={i}>{err}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          );
-        })
-      ) : (
-        <div className="text-gray-500">No records found.</div>
-      )}
+      {/* Dashboard */}
+      <div className="p-4">
+        {activeKey && <Dashboard caseType={activeKey} data={data[activeKey]} />}
+      </div>
     </div>
   );
 };

@@ -16,13 +16,22 @@ export async function resolveDateFolderName(): Promise<string | null> {
 
     // Before 4 PM → yesterday, after 4 PM → today
     const targetDate = hourIST < 16 ? subDays(nowIST, 1) : nowIST;
-    const folderName = "RT-" + format(targetDate, "dd MMM yyyy").toUpperCase();
+
+    // Generate both possible formats
+    const padded = "RT-" + format(targetDate, "dd MMM yyyy").toUpperCase();
+    const unpadded = "RT-" + format(targetDate, "d MMM yyyy").toUpperCase();
 
     // Read directory safely
     const entries = await fs.readdir(root_dir, { withFileTypes: true });
-    const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+    const folders = entries
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name.toUpperCase());
 
-    return folders.includes(folderName) ? folderName : null;
+    // Match either format
+    if (folders.includes(padded)) return padded;
+    if (folders.includes(unpadded)) return unpadded;
+
+    return null;
   } catch (err: any) {
     console.error(`Failed to read root_dir "${root_dir}":`, err.message);
     return null; // gracefully return null instead of crashing
@@ -33,7 +42,6 @@ export async function getSharedPath(): Promise<string | null> {
   const folderName = await resolveDateFolderName();
   return folderName ? `${root_dir}${folderName}` : null;
 }
-
 
 export const getLabTokens = async (commonPath: string): Promise<string[]> => {
   try {

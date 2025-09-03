@@ -1,7 +1,11 @@
 // --------------  Basically Extract the case_id -- patient name  -----------------
 function extractFilePrefix(text: string): string | null {
-  const regex = /\b([A-Z0-9]+ -- [A-Za-z ]+?)\s+Case Priority/i;
+  // Allow letters, numbers, and spaces after "--"
+  // End marker can be "Case Priority" or "Patient name"
+  const regex =
+    /\b([A-Z0-9]+ -- [A-Za-z0-9 ]+?)\s+(?:Case Priority|Patient name)/i;
   const match = text.match(regex);
+
   if (match && match[1]) {
     return match[1].replace(/\s+/g, " ").trim();
   }
