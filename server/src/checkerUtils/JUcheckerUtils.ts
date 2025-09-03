@@ -4,17 +4,8 @@ import {
   hasImageContaining,
 } from "./commonUtils.js";
 
-// ----------- Interfaces -------------
-export interface PdfData {
-  file_Prefix: string | null;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
-  tooth_Numbers: number[];
-  additional_Notes: string | null;
-}
+import { PdfData, FolderData } from "../types/commonTypes.js";
 
-export type FolderData = string[];
-
-// ----------- Checker Function -------------
 export const mainCheckerFunctionJU = async (
   pdfData: PdfData,
   folderData: FolderData

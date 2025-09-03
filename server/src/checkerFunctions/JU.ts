@@ -1,28 +1,8 @@
 import { mainCheckerFunctionJU } from "../checkerUtils/JUcheckerUtils.js";
-
-// ----------- Interfaces -------------
-export interface PdfData {
-  file_Prefix: string | null;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
-  tooth_Numbers: number[];
-  additional_Notes: string | null;
-}
-
-export type FolderData = string[];
-
-// Result type
-export interface Result {
-  success: boolean;
-  file_Prefix: string;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
-  tooth_Numbers: number[];
-  additional_Notes: string | null;
-  error: string[];
-}
+import { PdfData, FolderData, Result } from "../types/commonTypes.js";
 
 export type ResultData = Result | null;
 
-// ----------- Function (dynamic checks) -------------
 export const checkJUCases = async (
   pdfData: PdfData,
   folderData: FolderData
@@ -43,7 +23,7 @@ export const checkJUCases = async (
         f.includes(pdfData.file_Prefix!)
       );
       if (!hasMatchingFolder) {
-        errors.push(`No files found for ${pdfData.file_Prefix}.`);
+        errors.push(`No Export files found with name ${pdfData.file_Prefix}.`);
       }
     }
 

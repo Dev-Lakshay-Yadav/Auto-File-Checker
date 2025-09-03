@@ -1,8 +1,3 @@
-// utils/fileUtils.ts
-
-/**
- * Check if any file in the list contains a keyword and has one of the specified extensions
- */
 export const hasImageContaining = (
   folderFiles: string[],
   keyword: string
@@ -36,9 +31,8 @@ export const hasSTLContaining = (
   );
 };
 
-/**
- * Count how many files in the list contain a keyword and have one of the specified extensions
- */
+
+// Count how many files in the list contain a keyword and have one of the specified extensions
 export const countFilesContaining = (
   folderFiles: string[],
   keyword: string,
@@ -55,9 +49,8 @@ export const countFilesContaining = (
   );
 };
 
-/**
- * Count how many files in the list have one of the specified extensions
- */
+
+// Count how many files in the list have one of the specified extensions
 export const countFilesExt = (
   folderFiles: string[],
   exts: string[]

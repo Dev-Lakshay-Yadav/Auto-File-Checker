@@ -1,37 +1,17 @@
 import { mainCheckerFunctionJI } from "../checkerUtils/JIcheckerUtils.js";
+import { PdfDataJI, FolderData, ResultJI } from "../types/commonTypes.js";
 
-// ----------- Interfaces -------------
-export interface PdfData {
-  file_Prefix: string | null;
-  service_Type: null;
-  tooth_Numbers: number[];
-  additional_Notes: string | null;
-}
+export type ResultData = ResultJI | null;
 
-export type FolderData = string[];
-
-// Result type
-export interface Result {
-  success: boolean;
-  file_Prefix: string;
-  service_Type: null;
-  tooth_Numbers: number[];
-  additional_Notes: string | null;
-  error: string[];
-}
-
-export type ResultData = Result | null;
-
-// ----------- Function (dynamic checks) -------------
 export const checkJICases = async (
-  pdfData: PdfData,
+  pdfData: PdfDataJI,
   folderData: FolderData
 ): Promise<ResultData> => {
   try {
     const errors: string[] = [];
 
     if (pdfData.service_Type !== null) {
-      errors.push("some service type detected");
+      errors.push("some service type detected in JI");
     }
 
     // --- validations ---
@@ -43,7 +23,7 @@ export const checkJICases = async (
         f.includes(pdfData.file_Prefix!)
       );
       if (!hasMatchingFolder) {
-        errors.push(`No files found for ${pdfData.file_Prefix}.`);
+        errors.push(`No Export files found with name ${pdfData.file_Prefix}.`);
       }
     }
 

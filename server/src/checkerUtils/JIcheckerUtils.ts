@@ -1,21 +1,9 @@
-import {
-  countFilesExt,
-  hasImageContaining
-} from "./commonUtils.js";
+import { countFilesExt, hasImageContaining } from "./commonUtils.js";
 
-// ----------- Interfaces -------------
-export interface PdfData {
-  file_Prefix: string | null;
-  service_Type: "Crown And Bridge" | "Implant" | "Smile Design" | null;
-  tooth_Numbers: number[];
-  additional_Notes: string | null;
-}
+import { PdfDataJI, FolderData } from "../types/commonTypes.js";
 
-export type FolderData = string[];
-
-// ----------- Checker Function -------------
 export const mainCheckerFunctionJI = async (
-  pdfData: PdfData,
+  pdfData: PdfDataJI,
   folderData: FolderData
 ): Promise<string[]> => {
   const errors: string[] = [];
