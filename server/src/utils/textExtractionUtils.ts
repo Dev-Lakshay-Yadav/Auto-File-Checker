@@ -1,77 +1,106 @@
-// --------------  Basically Extract the case_id -- patient name  -----------------
-function extractFilePrefix(text: string): string | null {
-  const regex =
-    /\b([A-Z0-9]+ -- [A-Za-z0-9 ]+?)\s+(?:Case Priority|Patient name)/i;
+// ----------------- Utility Helpers -----------------
+function matchRegex(
+  text: string,
+  regex: RegExp,
+  groupIndex = 1
+): string | null {
   const match = text.match(regex);
-
-  if (match && match[1]) {
-    return match[1].replace(/\s+/g, " ").trim();
-  }
-  return null;
+  return match && match[groupIndex] ? match[groupIndex].trim() : null;
 }
 
-// --------------  Basically Extract the Service type data   -----------------
-function extractServiceType(
-  text: string
-): "Crown And Bridge" | "Implant" | "Smile Design" | null {
-  // Only consider text before "Tooth Numbers:"
-  const cutoffIndex = text.indexOf("Tooth Numbers:");
-  const searchText = cutoffIndex !== -1 ? text.substring(0, cutoffIndex) : text;
+// ----------------- Extraction Functions -----------------
 
-  const services = ["Crown And Bridge", "Implant", "Smile Design"];
+// Case ID + Patient Name
+function extractFilePrefix(text: string): string | null {
+  const result = matchRegex(
+    text,
+    /\b([A-Z0-9]+ -- [\s\S]+?)\s+(?=Case Priority|Patient name)/i
+  );
+  return result ? result.replace(/\s+/g, " ") : null;
+}
 
-  for (const service of services) {
-    const regex = new RegExp(`\\b${service}\\b`, "i"); // case-insensitive
+// Service Type
+const SERVICES = [
+  "Crown And Bridge",
+  "Implant",
+  "Smile Design",
+  "Digital Model",
+  "Surgical Guide",
+  "Nightguard",
+  "Other Treatments",
+] as const;
+
+function extractServiceType(text: string): (typeof SERVICES)[number] | null {
+  const startMarkers = ["Patient Name:", "Patient name -"];
+  const endMarkers = ["Model Type:", "Tooth Numbers:"];
+
+  // Find first matching start marker
+  let startIndex = -1;
+  for (const marker of startMarkers) {
+    const idx = text.indexOf(marker);
+    if (idx !== -1) {
+      startIndex = idx + marker.length;
+      break;
+    }
+  }
+  if (startIndex === -1) return null;
+
+  // Find nearest end marker
+  let endIndex = text.length;
+  for (const marker of endMarkers) {
+    const idx = text.indexOf(marker, startIndex);
+    if (idx !== -1 && idx < endIndex) {
+      endIndex = idx;
+    }
+  }
+
+  // Extract region between start & end
+  const searchText = text.substring(startIndex, endIndex).trim();
+
+  // Check against SERVICES
+  for (const item of SERVICES) {
+    const regex = new RegExp(item.replace(/\s+/g, "\\s+"), "i");
     if (regex.test(searchText)) {
-      if (service.toLowerCase() === "crown and bridge")
-        return "Crown And Bridge";
-      if (service.toLowerCase() === "implant") return "Implant";
-      if (service.toLowerCase() === "smile design") return "Smile Design";
+      return item;
     }
   }
 
   return null;
 }
 
-// --------------  Basically Extract the Tooth Numbers data   -----------------
+// Tooth Numbers
 function extractToothNumbers(text: string): number[] {
-  // Capture everything after "Tooth Numbers:" until end of line
-  const regex = /Tooth Numbers:\s*([0-9,\s]+)/i;
-  const match = text.match(regex);
-
-  if (match && match[1]) {
-    return match[1]
-      .split(/[\s,]+/) // split by space OR comma
-      .map((num) => parseInt(num.trim(), 10))
-      .filter((num) => !isNaN(num));
-  }
-
-  return [];
+  const result = matchRegex(text, /Tooth Numbers:\s*([0-9,\s]+)/i);
+  return result
+    ? result
+        .split(/[\s,]+/)
+        .map((num) => parseInt(num, 10))
+        .filter((num) => !isNaN(num))
+    : [];
 }
 
-// --------------  Basically Extract the additional notes data   -----------------
+// Additional Notes
 function extractAdditionalNotes(text: string): string | null {
-  const match = text.match(
+  return matchRegex(
+    text,
     /Additional Notes:\s*([\s\S]*?)(?:\n[A-Z][^\n]*:|\n?$)/i
   );
-  return match ? match[1].trim() : null;
 }
 
-// ----------------- Main Processor Function utilize above function logics -----------------
+// ----------------- Main Processor -----------------
 export async function processPdfText(text: string) {
-  const prefixData: string | null = extractFilePrefix(text);
-  const serviceData: string | null = extractServiceType(text);
-  const additionalData: string | null = extractAdditionalNotes(text);
-  const toothNumbers: number[] | null = extractToothNumbers(text);
+  const serviceType = extractServiceType(text);
+
+  // Skip tooth numbers for specific services
+  const skipToothNumbers = ["Digital Model", "Nightguard", "Other Treatments"];
 
   return {
-    file_Prefix: prefixData,
-    service_Type: serviceData as
-      | "Crown And Bridge"
-      | "Implant"
-      | "Smile Design"
-      | null,
-    tooth_Numbers: toothNumbers,
-    additional_Notes: additionalData,
+    file_Prefix: extractFilePrefix(text),
+    service_Type: serviceType,
+    tooth_Numbers:
+      serviceType && skipToothNumbers.includes(serviceType)
+        ? null
+        : extractToothNumbers(text),
+    additional_Notes: extractAdditionalNotes(text),
   };
 }

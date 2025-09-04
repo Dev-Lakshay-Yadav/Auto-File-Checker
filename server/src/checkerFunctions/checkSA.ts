@@ -2,15 +2,15 @@ import {
   countFilesExt,
   hasImageContaining,
   hasSTLContaining,
-} from "./commonUtils.js";
+} from "../checkerUtils/commonUtils.js";
 
 import { PdfData, FolderData } from "../types/commonTypes.js";
 
-export const mainCheckerFunctionSA = async (
+export const CheckerFunctionSA = async (
   pdfData: PdfData,
-  folderData: FolderData
+  folderData: FolderData,
+  errors: string[]
 ): Promise<string[]> => {
-  const errors: string[] = [];
 
   if (!(countFilesExt(folderData, [".html"]) > 0)) {
     errors.push("Missing .html file");
@@ -39,8 +39,5 @@ export const mainCheckerFunctionSA = async (
     }
     return errors;
   }
-
-  errors.push("service is not verified");
-
   return errors;
 };

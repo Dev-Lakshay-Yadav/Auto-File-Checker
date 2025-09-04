@@ -1,12 +1,12 @@
-import { countFilesExt, hasImageContaining } from "./commonUtils.js";
+import { countFilesExt, hasImageContaining } from "../checkerUtils/commonUtils.js";
 
-import { PdfDataJI, FolderData } from "../types/commonTypes.js";
+import { PdfData, FolderData } from "../types/commonTypes.js";
 
-export const mainCheckerFunctionJI = async (
-  pdfData: PdfDataJI,
-  folderData: FolderData
+export const CheckerFunctionJI = async (
+  pdfData: PdfData,
+  folderData: FolderData,
+  errors : string[]
 ): Promise<string[]> => {
-  const errors: string[] = [];
 
   if (!(countFilesExt(folderData, [".zip"]) > 0)) {
     errors.push("Missing .zip file");

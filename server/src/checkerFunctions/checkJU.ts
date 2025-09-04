@@ -2,25 +2,17 @@ import {
   countFilesContaining,
   countFilesExt,
   hasImageContaining,
-} from "./commonUtils.js";
+} from "../checkerUtils/commonUtils.js";
 
 import { PdfData, FolderData } from "../types/commonTypes.js";
 
-export const mainCheckerFunctionJU = async (
+export const checkerFunctionJU = async (
   pdfData: PdfData,
-  folderData: FolderData
+  folderData: FolderData,
+  errors: string[]
 ): Promise<string[]> => {
-  const errors: string[] = [];
-
-  if (!(countFilesExt(folderData, [".html"]) > 0)) {
-    errors.push("Missing .html file");
-  }
-  if (!(countFilesExt(folderData, [".zip"]) > 0)) {
-    errors.push("Missing .zip file");
-  }
-
+  // crown and bridge
   if (pdfData.service_Type === "Crown And Bridge") {
-    // Existing checks
     if (!hasImageContaining(folderData, "occlusal contact")) {
       errors.push("Missing image: occlusal contact");
     }
@@ -31,8 +23,16 @@ export const mainCheckerFunctionJU = async (
       errors.push("Missing image: cement gap");
     }
     if (
-      !(countFilesContaining(folderData, "pic", [".jpg", ".jpeg", ".png"]) >= 3)
+      !(
+        countFilesContaining(folderData, "pic", [
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+        ]) >= 3
+      )
     ) {
+      errors = errors.filter((e) => e !== "At least 1 pic required");
       errors.push("At least 3 additional pics required");
     }
 
@@ -47,7 +47,8 @@ export const mainCheckerFunctionJU = async (
       ).length ?? 0;
 
     if (stlFilesFound < stlPerToothExpected) {
-      errors.push("Missing .stl files for teeth");
+      errors = errors.filter((e) => e !== "At least 1 .stl file required");
+      errors.push("Missing .stl files per teeth");
     }
 
     const numTeeth = pdfData.tooth_Numbers?.length || 0;
@@ -69,7 +70,7 @@ export const mainCheckerFunctionJU = async (
 
       if (!hasStl || !hasImage) {
         errors.push(
-          "Pre-op files missing: need at least one .stl and one image (.jpg/.jpeg/.png)"
+          "Pre-op files missing: need atleast one .stl and one image"
         );
       }
     }
@@ -77,10 +78,8 @@ export const mainCheckerFunctionJU = async (
     return errors;
   }
 
+  // implant
   if (pdfData.service_Type === "Implant") {
-    if (!hasImageContaining(folderData, "implant selection")) {
-      errors.push("Missing image: implant selection");
-    }
     if (!hasImageContaining(folderData, "hole angulation")) {
       errors.push("Missing image: hole angulation");
     }
@@ -99,10 +98,17 @@ export const mainCheckerFunctionJU = async (
     if (!hasImageContaining(folderData, "proximal contact")) {
       errors.push("Missing image: proximal contact");
     }
-
     if (
-      !(countFilesContaining(folderData, "pic", [".jpg", ".jpeg", ".png"]) >= 4)
+      !(
+        countFilesContaining(folderData, "pic", [
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+        ]) >= 4
+      )
     ) {
+      errors = errors.filter((e) => e !== "At least 1 pic required");
       errors.push("At least 4 additional pics required");
     }
     if (
@@ -117,19 +123,26 @@ export const mainCheckerFunctionJU = async (
     return errors;
   }
 
+  // smile design
   if (pdfData.service_Type === "Smile Design") {
     if (
-      !(countFilesContaining(folderData, "pic", [".jpg", ".jpeg", ".png"]) >= 6)
+      !(
+        countFilesContaining(folderData, "pic", [
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+        ]) >= 6
+      )
     ) {
+      errors = errors.filter((e) => e !== "At least 3 pic required");
       errors.push("At least 6 additional pics required");
     }
     if (!(countFilesExt(folderData, [".stl"]) >= 2)) {
+      errors = errors.filter((e) => e !== "At least 1 .stl file required");
       errors.push("At least 2 .stl files required");
     }
     return errors;
   }
-
-  errors.push("service is not verified");
-
   return errors;
 };

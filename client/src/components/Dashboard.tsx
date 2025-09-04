@@ -1,18 +1,17 @@
 interface ApiResponseItem {
   success: boolean;
   file_Prefix: string;
-  service_Type: string;
+  service_Type: string | null;
   tooth_Numbers: number[];
   additional_Notes: string;
   error: string[];
 }
 
 interface DashboardProps {
-  caseType: string;
   data: (ApiResponseItem | null)[];
 }
 
-const Dashboard = ({ caseType, data }: DashboardProps) => {
+const Dashboard = ({ data }: DashboardProps) => {
   return (
     <div className="flex flex-col text-sm w-full rounded-xl overflow-hidden">
       {data.length > 0 ? (
@@ -34,12 +33,18 @@ const Dashboard = ({ caseType, data }: DashboardProps) => {
                   key={index}
                   className={`flex w-full gap-2 px-4 py-3 ${
                     item.success ? `bg-gray-300` : `bg-gray-100`
-                  } `}
+                  }`}
                 >
-                  <div className="w-2/12">{item.file_Prefix}</div>
-                  <div className="w-2/12">{item.service_Type}</div>
-                  <div className="w-2/12">{item.tooth_Numbers.join(", ")}</div>
-                  <div className="w-3/12">{item.additional_Notes}</div>
+                  <div className="w-2/12">{item.file_Prefix ?? "Null"}</div>
+                  <div className="w-2/12">{item.service_Type ?? "Null"}</div>
+                  <div className="w-2/12">
+                    {item.tooth_Numbers && item.tooth_Numbers.length > 0
+                      ? item.tooth_Numbers.join(", ")
+                      : "None"}
+                  </div>
+                  <div className="w-3/12">
+                    {item.additional_Notes ?? "Null"}
+                  </div>
                   <div className="w-3/12">
                     {item.success ? (
                       <span className="text-green-600 font-bold">

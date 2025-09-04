@@ -2,7 +2,7 @@ export const hasImageContaining = (
   folderFiles: string[],
   keyword: string
 ): boolean => {
-  const exts = [".jpg", ".jpeg", ".png"];
+  const exts = [".jpg", ".jpeg", ".png",".gif"];
   return (
     folderFiles?.some((file) => {
       const f = file.toLowerCase();

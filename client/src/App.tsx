@@ -67,7 +67,7 @@ const App = () => {
 
       {/* Dashboard */}
       <div className="p-4">
-        {activeKey && <Dashboard caseType={activeKey} data={data[activeKey]} />}
+        {activeKey && <Dashboard data={data[activeKey]} />}
       </div>
     </div>
   );
