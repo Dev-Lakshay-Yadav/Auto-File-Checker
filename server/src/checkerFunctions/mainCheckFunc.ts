@@ -32,7 +32,7 @@ export const validateAndBuildResult = async (
     errors.push("Missing file prefix in PDF.");
   }
 
-  if (!folderData || folderData.length > 0) {
+  if (!folderData || folderData.length < 1) {
     errors.push("No Export files yet.");
   }
 

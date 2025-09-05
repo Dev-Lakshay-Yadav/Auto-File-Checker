@@ -117,7 +117,7 @@ export const checkerFunctionJU = async (
         0
       )
     ) {
-      errors.push("Missing .stl files");
+      errors.push("Missing .stl files per tooth");
     }
 
     return errors;

@@ -103,6 +103,13 @@ export const splitCasesByLabToken = async () => {
       "IH",
       "GV",
       "GI",
+      "DS",
+      "OI",
+      "SX",
+      "XC",
+      "ZJ",
+      "RJ",
+      "IH",
     ];
 
     // filter only included tokens
